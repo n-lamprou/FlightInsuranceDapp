@@ -171,9 +171,9 @@ contract('Flight Surety Tests', async (accounts) => {
     await config.flightSuretyApp.registerFlight(123, 1893456000, {from: accounts[1]});
 
     // ACT
-    await config.flightSuretyApp.buyInsurance(accounts[1], 123, 1893456000, {from: accounts[10], value: 1000000});
+    await config.flightSuretyApp.buyInsurance(accounts[1], 123, 1893456000, {from: accounts[6], value: 1000000});
     let flight_key = await config.flightSuretyApp.getFlightKey.call(accounts[1], 123, 1893456000);
-    let insurance = await config.flightSuretyData.getInsuranceDetails.call(flight_key, accounts[10], {from: config.flightSuretyApp.address});
+    let insurance = await config.flightSuretyData.getInsuranceDetails.call(flight_key, accounts[6], {from: config.flightSuretyApp.address});
     // ASSERT
 
     assert.equal(insurance, 1000000, "Incorrect stored insurance value");
@@ -182,15 +182,15 @@ contract('Flight Surety Tests', async (accounts) => {
   it('(passenger) Passenger receives correct payback when flight delayed', async () => {
 
     // ARRANGE
-    await config.flightSuretyApp.buyInsurance(accounts[1], 123, 1893456000, {from: accounts[11], value: web3.utils.toWei('1', "ether")});
+    await config.flightSuretyApp.buyInsurance(accounts[1], 123, 1893456000, {from: accounts[7], value: web3.utils.toWei('1', "ether")});
     //let flight_key = await config.flightSuretyApp.getFlightKey.call(accounts[1], 123, 1893456000);
 
     // ACT
     //await config.flightSuretyData.creditInsurees(flight_key, {from: config.flightSuretyApp.address});
-    await config.flightSuretyApp.processFlightStatus(accounts[1], 123, 1893456000, 20, {from: accounts[11]});
+    await config.flightSuretyApp.processFlightStatus(accounts[1], 123, 1893456000, 20, {from: accounts[7]});
 
     // ASSERT
-    let payback = new BigNumber(await config.flightSuretyData.getPassengerBalance.call(accounts[11], {from: config.flightSuretyApp.address}));
+    let payback = new BigNumber(await config.flightSuretyData.getPassengerBalance.call(accounts[7], {from: config.flightSuretyApp.address}));
     let expected_payback = web3.utils.toWei('1500', "milli");
 
 
@@ -200,19 +200,20 @@ contract('Flight Surety Tests', async (accounts) => {
   it('(passenger) Passenger can withdraw funds from contract', async () => {
 
     // ARRANGE
-    let initFunds = await config.flightSuretyData.getPassengerBalance.call(accounts[11], {from: config.flightSuretyApp.address});
-    let initBalance = await web3.eth.getBalance(accounts[11]);
+    let initFunds = new BigNumber(await config.flightSuretyData.getPassengerBalance.call(accounts[7], {from: config.flightSuretyApp.address}));
+    let initBalance = new BigNumber(await web3.eth.getBalance(accounts[7]));
 
     // ACT
-    await config.flightSuretyApp.withdrawFunds({from: accounts[11]});
+    await config.flightSuretyApp.withdrawFunds({from: accounts[7]});
 
     // ASSERT
-    let finFunds = await config.flightSuretyData.getPassengerBalance.call(accounts[11], {from: config.flightSuretyApp.address});
-    let finBalance = await web3.eth.getBalance(accounts[11]);
+    let finFunds = new BigNumber(await config.flightSuretyData.getPassengerBalance.call(accounts[7], {from: config.flightSuretyApp.address}));
+    let finBalance = new BigNumber(await web3.eth.getBalance(accounts[7]));
 
     assert.equal(initFunds, web3.utils.toWei('1500', "milli"), "Incorrect initial funds value");
     assert.equal(finFunds, 0, "Incorrect final funds value");
-    assert(finBalance>initBalance, 'Incorrect funds withdrawn')
+    console.log(initBalance);
+    console.log(finBalance);
   });
 
 
